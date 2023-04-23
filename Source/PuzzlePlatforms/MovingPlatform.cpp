@@ -21,6 +21,11 @@ void AMovingPlatform::BeginPlay()
         SetReplicates(true);
         SetReplicateMovement(true);
     }
+
+    TargetLocation = FVector(0, 230, 330);
+    GlobalStartLocation = GetActorLocation();
+    GlobalTargetLocation = GetTransform().TransformPosition(TargetLocation); // GetTransform() returns the position, rotation, and scale
+
 }
 
 
@@ -30,8 +35,22 @@ void AMovingPlatform::Tick(float DeltaTime)
 
     if (HasAuthority()) // !HasAuthority() means on the client, not on the server
     {
+        // FTransform CurrTransform = GetTransform();
+        // UE_LOG(LogTemp, Warning, TEXT("%s"), *CurrTransform.ToString());
+
         FVector Location = GetActorLocation();
-        Location += FVector(Speed * DeltaTime, 0, 0);
+        float JourneyLength = (GlobalTargetLocation - GlobalStartLocation).Size();
+        float JourneyTraveled = (Location - GlobalStartLocation).Size();
+
+        if (JourneyTraveled >= JourneyLength)
+        {
+            FVector TempSwap = GlobalStartLocation;
+            GlobalStartLocation = GlobalTargetLocation;
+            GlobalTargetLocation = TempSwap;
+        }
+
+        FVector Direction = (GlobalTargetLocation - GlobalStartLocation).GetSafeNormal();
+        Location += DeltaTime * Speed * Direction;
         SetActorLocation(Location);
     }
 }
