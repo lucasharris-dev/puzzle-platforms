@@ -22,7 +22,6 @@ void AMovingPlatform::BeginPlay()
         SetReplicateMovement(true);
     }
 
-    TargetLocation = FVector(0, 230, 330);
     GlobalStartLocation = GetActorLocation();
     GlobalTargetLocation = GetTransform().TransformPosition(TargetLocation); // GetTransform() returns the position, rotation, and scale
 
